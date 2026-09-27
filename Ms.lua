@@ -1,7 +1,7 @@
 -- RAWAF HUB - Professional Script for Roblox
--- Optimized for Mobile & PC Execution (Delta, Xeno, Arceus X)
+-- Fixed Orion Library Source & Enhanced Logic
 
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 local Window = OrionLib:MakeWindow({
     Name = "RAWAF HUB | Steal an Egg 🥚",
     HidePremium = false,
@@ -19,7 +19,7 @@ getgenv().ESP = false
 getgenv().WalkSpeed = 16
 getgenv().JumpPower = 50
 
--- Bypass Protection & Anti-AFK
+-- Anti-AFK Protection
 local VirtualUser = game:GetService("VirtualUser")
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
     VirtualUser:CaptureController()
@@ -46,10 +46,12 @@ MainTab:AddToggle({
             while getgenv().AutoFarm do
                 task.wait(0.1)
                 pcall(function()
-                    for _, obj in pairs(workspace:GetChildren()) do
-                        if obj:IsA("Part") and (obj.Name:lower():find("egg") or obj.Name:lower():find("item")) then
-                            if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if not getgenv().AutoFarm then break end
+                        if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("item")) then
+                            local char = game.Players.LocalPlayer.Character
+                            if char and char:FindFirstChild("HumanoidRootPart") then
+                                char.HumanoidRootPart.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
                                 task.wait(0.2)
                             end
                         end
@@ -69,7 +71,7 @@ MainTab:AddToggle({
             while getgenv().AutoSteal do
                 task.wait(0.2)
                 pcall(function()
-                    -- Custom Auto Steal Logic Loop
+                    -- Custom Auto Steal Logic
                 end)
             end
         end)
@@ -98,7 +100,9 @@ PlayerTab:AddSlider({
     Callback = function(Value)
         getgenv().WalkSpeed = Value
         pcall(function()
-            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+            if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+            end
         end)
     end    
 })
@@ -114,7 +118,9 @@ PlayerTab:AddSlider({
     Callback = function(Value)
         getgenv().JumpPower = Value
         pcall(function()
-            game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+            if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+                game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+            end
         end)
     end    
 })
@@ -166,13 +172,14 @@ SettingsTab:AddButton({
     end    
 })
 
--- Apply Speed Loop Fix
+-- Keep Speed Fixed on Respawn
 task.spawn(function()
     while task.wait(0.5) do
         pcall(function()
-            if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-                if game.Players.LocalPlayer.Character.Humanoid.WalkSpeed ~= getgenv().WalkSpeed then
-                    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = getgenv().WalkSpeed
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                if char.Humanoid.WalkSpeed ~= getgenv().WalkSpeed then
+                    char.Humanoid.WalkSpeed = getgenv().WalkSpeed
                 end
             end
         end)
